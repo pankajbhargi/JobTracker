@@ -1,0 +1,6 @@
+Cognito - User pool creation Outputs:
+CdkStack.AuthenticationUserPoolArn029ABC5B = arn:aws:cognito-idp:us-east-1:893431614804:userpool/us-east-1_yYCMzYeEv
+CdkStack.AuthenticationUserPoolClientIdD7F62A6D = 40lpfhpaani64egiqq6slf0765
+CdkStack.AuthenticationUserPoolIdF0D106F7 = us-east-1_yYCMzYeEv
+Stack ARN:
+arn:aws:cloudformation:us-east-1:893431614804:stack/CdkStack/62e00bb0-7890-11f1-9d9b-0affe47da7c3
