@@ -1,0 +1,58 @@
+<div class="application-detail-page">
+  @if (application(); as app) {
+    <mat-card class="application-detail-card">
+      <mat-card-header>
+        <mat-card-title>{{ app.position }}</mat-card-title>
+        <mat-card-subtitle>{{ app.company }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <dl class="application-detail__meta">
+          <dt>Applied</dt>
+          <dd>{{ app.appliedDate }}</dd>
+          @if (app.followUpDate) {
+            <dt>Follow-up</dt>
+            <dd>{{ app.followUpDate }}</dd>
+          }
+          @if (app.notes) {
+            <dt>Notes</dt>
+            <dd>{{ app.notes }}</dd>
+          }
+        </dl>
+
+        <form [formGroup]="editForm" (ngSubmit)="onSave()" class="application-detail__form">
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (option of statusOptions; track option) {
+                <mat-option [value]="option">{{ option }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Job Description</mat-label>
+            <textarea matInput rows="8" formControlName="jobDescription"></textarea>
+          </mat-form-field>
+
+          @if (saved()) {
+            <p class="application-detail__saved">Saved.</p>
+          }
+
+          <div class="application-detail__actions">
+            <button mat-button type="button" routerLink="/applications">Back</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="editForm.invalid || submitting()">
+              @if (submitting()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Save Changes
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <p>Application not found.</p>
+  }
+</div>

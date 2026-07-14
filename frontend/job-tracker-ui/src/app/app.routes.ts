@@ -7,6 +7,8 @@ import { Login } from './features/auth/login/login';
 import { Register } from './features/auth/register/register';
 import { Dashboard } from './features/dashboard/dashboard';
 import { Applications } from './features/applications/applications';
+import { ApplicationForm } from './features/applications/application-form/application-form';
+import { ApplicationDetail } from './features/applications/application-detail/application-detail';
 import { Analytics } from './features/analytics/analytics';
 import { Profile } from './features/profile/profile';
 
@@ -35,7 +37,20 @@ export const routes: Routes = [
       },
       {
         path: 'applications',
-        component: Applications
+        children: [
+          {
+            path: '',
+            component: Applications
+          },
+          {
+            path: 'new',
+            component: ApplicationForm
+          },
+          {
+            path: ':id',
+            component: ApplicationDetail
+          }
+        ]
       },
       {
         path: 'analytics',

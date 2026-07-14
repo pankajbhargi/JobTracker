@@ -1,0 +1,45 @@
+.application-detail-page {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.application-detail-card {
+  width: 100%;
+  max-width: 700px;
+}
+
+.application-detail__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.application-detail__meta dt {
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.application-detail__meta dd {
+  margin: 0;
+}
+
+.application-detail__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.application-detail__saved {
+  color: #2e7d32;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.application-detail__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

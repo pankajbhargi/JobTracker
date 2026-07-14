@@ -1,0 +1,46 @@
+.applications__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.applications__table {
+  width: 100%;
+}
+
+.applications__row {
+  cursor: pointer;
+}
+
+.applications__row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.applications__empty {
+  opacity: 0.7;
+}
+
+.status-chip {
+  text-transform: capitalize;
+}
+
+.status-chip--applied {
+  background: #e3f2fd;
+}
+
+.status-chip--interviewing {
+  background: #fff8e1;
+}
+
+.status-chip--offer {
+  background: #e8f5e9;
+}
+
+.status-chip--rejected {
+  background: #ffebee;
+}
+
+.status-chip--withdrawn {
+  background: #eeeeee;
+}

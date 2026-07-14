@@ -1,0 +1,59 @@
+<div class="application-form-page">
+  <mat-card class="application-form-card">
+    <mat-card-header>
+      <mat-card-title>New Application</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="application-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Company</mat-label>
+          <input matInput formControlName="company" />
+          @if (form.controls.company.hasError('required')) {
+            <mat-error>Company is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Position</mat-label>
+          <input matInput formControlName="position" />
+          @if (form.controls.position.hasError('required')) {
+            <mat-error>Position is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Applied Date</mat-label>
+          <input matInput type="date" formControlName="appliedDate" />
+          @if (form.controls.appliedDate.hasError('required')) {
+            <mat-error>Applied date is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Job Description</mat-label>
+          <textarea matInput rows="6" formControlName="jobDescription"></textarea>
+          @if (form.controls.jobDescription.hasError('required')) {
+            <mat-error>Job description is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Notes (optional)</mat-label>
+          <textarea matInput rows="3" formControlName="notes"></textarea>
+        </mat-form-field>
+
+        <div class="application-form__actions">
+          <button mat-button type="button" routerLink="/applications">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || submitting()">
+            @if (submitting()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              Save Application
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

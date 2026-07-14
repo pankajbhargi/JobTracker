@@ -1,11 +1,21 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Application } from '../models/application.model';
+import { BehaviorSubject, Observable, map, of } from 'rxjs';
+import { Application, ApplicationStatus } from '../models/application.model';
 
-// Static sample data standing in for the real API (Phase 3). Every method
-// below returns an Observable, matching what HttpClient.get<T>() returns,
-// so swapping the body from `of(...)` to a real `this.http.get(...)` call
-// later won't require touching any component that consumes this service.
+export interface CreateApplicationInput {
+  company: string;
+  position: string;
+  jobDescription: string;
+  appliedDate: string;
+  notes?: string;
+}
+
+export interface UpdateApplicationInput {
+  status: ApplicationStatus;
+  jobDescription: string;
+}
+
+// Static sample data standing in for the real API (Phase 3).
 const MOCK_APPLICATIONS: Application[] = [
   {
     applicationId: '1',
@@ -59,11 +69,45 @@ const MOCK_APPLICATIONS: Application[] = [
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationsService {
+  // BehaviorSubject holds the current in-memory list and replays its latest
+  // value to every new subscriber. That's what keeps the listing page and
+  // the create/edit screens in sync within a session, without a real
+  // backend to refetch from yet — every method here returns an Observable
+  // (the same shape HttpClient returns) so Phase 3 can swap the bodies for
+  // real HTTP calls without touching any component.
+  private readonly applications$ = new BehaviorSubject<Application[]>(MOCK_APPLICATIONS);
+
   getApplications(): Observable<Application[]> {
-    return of(MOCK_APPLICATIONS);
+    return this.applications$.asObservable();
   }
 
   getApplication(applicationId: string): Observable<Application | undefined> {
-    return of(MOCK_APPLICATIONS.find((app) => app.applicationId === applicationId));
+    return this.applications$.pipe(
+      map((apps) => apps.find((app) => app.applicationId === applicationId)),
+    );
+  }
+
+  createApplication(input: CreateApplicationInput): Observable<Application> {
+    const newApplication: Application = {
+      ...input,
+      applicationId: crypto.randomUUID(),
+      userId: 'mock-user',
+      status: 'applied',
+    };
+    this.applications$.next([...this.applications$.value, newApplication]);
+    return of(newApplication);
+  }
+
+  updateApplication(applicationId: string, changes: UpdateApplicationInput): Observable<Application> {
+    const updatedList = this.applications$.value.map((app) =>
+      app.applicationId === applicationId ? { ...app, ...changes } : app,
+    );
+    this.applications$.next(updatedList);
+
+    const updated = updatedList.find((app) => app.applicationId === applicationId);
+    if (!updated) {
+      throw new Error(`Application ${applicationId} not found`);
+    }
+    return of(updated);
   }
 }
