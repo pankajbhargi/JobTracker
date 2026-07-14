@@ -1,37 +1,54 @@
 import { Routes } from '@angular/router';
 
+import { MainLayout } from './layout/main-layout/main-layout';
+import { authGuard } from './core/guards/auth.guard';
+
+import { Login } from './features/auth/login/login';
+import { Register } from './features/auth/register/register';
+import { Dashboard } from './features/dashboard/dashboard';
+import { Applications } from './features/applications/applications';
+import { Analytics } from './features/analytics/analytics';
+import { Profile } from './features/profile/profile';
+
 export const routes: Routes = [
   {
+    path: 'login',
+    component: Login
+  },
+  {
+    path: 'register',
+    component: Register
+  },
+  {
     path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('./features/dashboard/dashboard')
-        .then((m) => m.Dashboard),
-  },
-  {
-    path: 'applications',
-    loadComponent: () =>
-      import('./features/applications/applications')
-        .then((m) => m.Applications),
-  },
-  {
-    path: 'analytics',
-    loadComponent: () =>
-      import('./features/analytics/analytics')
-        .then((m) => m.Analytics),
-  },
-  {
-    path: 'profile',
-    loadComponent: () =>
-      import('./features/profile/profile')
-        .then((m) => m.Profile),
+    component: MainLayout,
+    canActivateChild: [authGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        component: Dashboard
+      },
+      {
+        path: 'applications',
+        component: Applications
+      },
+      {
+        path: 'analytics',
+        component: Analytics
+      },
+      {
+        path: 'profile',
+        component: Profile
+      }
+    ]
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
-  },
+    redirectTo: 'dashboard'
+  }
 ];

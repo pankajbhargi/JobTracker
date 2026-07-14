@@ -8,5 +8,6 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('job-tracker-ui');
+  // protected readonly title = signal('job-tracker-ui');
+  protected title = 'job-tracker-ui';
 }

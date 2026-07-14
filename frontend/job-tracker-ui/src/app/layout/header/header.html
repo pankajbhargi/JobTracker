@@ -1,1 +1,53 @@
-<p>header works!</p>
+<mat-toolbar color="primary" class="app-header">
+  <div class="app-header__left">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="navMenu"
+      aria-label="Open main menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <mat-menu #navMenu="matMenu">
+      @for (item of menuItems; track item.route) {
+        <a
+          mat-menu-item
+          [routerLink]="item.route"
+          routerLinkActive="app-header__menu-item--active"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </mat-menu>
+  </div>
+
+  <div class="app-header__center">
+    <span class="app-header__title">Job Application Tracker</span>
+  </div>
+
+  <div class="app-header__right">
+    <!-- Notification bell will go here later, e.g.:
+    <button mat-icon-button aria-label="Notifications">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    -->
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="userMenu"
+      aria-label="User menu"
+    >
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <mat-menu #userMenu="matMenu">
+      @if (currentUser(); as user) {
+        <button mat-menu-item disabled>{{ user.email }}</button>
+      }
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>
