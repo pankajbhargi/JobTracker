@@ -50,6 +50,7 @@ export class ApplicationDetail {
   protected readonly editForm = this.fb.nonNullable.group({
     status: ['applied' as ApplicationStatus, Validators.required],
     jobDescription: ['', Validators.required],
+    notes: [''],
   });
 
   protected readonly submitting = signal(false);
@@ -65,6 +66,7 @@ export class ApplicationDetail {
         this.editForm.setValue({
           status: app.status,
           jobDescription: app.jobDescription,
+          notes: app.notes || ''
         });
       }
     });

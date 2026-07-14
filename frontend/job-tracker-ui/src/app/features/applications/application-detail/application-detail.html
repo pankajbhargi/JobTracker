@@ -14,10 +14,6 @@
             <dt>Follow-up</dt>
             <dd>{{ app.followUpDate }}</dd>
           }
-          @if (app.notes) {
-            <dt>Notes</dt>
-            <dd>{{ app.notes }}</dd>
-          }
         </dl>
 
         <form [formGroup]="editForm" (ngSubmit)="onSave()" class="application-detail__form">
@@ -33,6 +29,11 @@
           <mat-form-field appearance="outline">
             <mat-label>Job Description</mat-label>
             <textarea matInput rows="8" formControlName="jobDescription"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Notes</mat-label>
+            <textarea matInput rows="6" formControlName="notes"></textarea>
           </mat-form-field>
 
           @if (saved()) {

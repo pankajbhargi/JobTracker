@@ -13,6 +13,7 @@ export interface CreateApplicationInput {
 export interface UpdateApplicationInput {
   status: ApplicationStatus;
   jobDescription: string;
+  notes: string;
 }
 
 // Static sample data standing in for the real API (Phase 3).
