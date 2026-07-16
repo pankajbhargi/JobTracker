@@ -1,12 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApplicationsService } from '../../../core/services/applications.service';
+import { ResumesService } from '../../../core/services/resumes.service';
 
 @Component({
   selector: 'app-application-form',
@@ -15,6 +18,7 @@ import { ApplicationsService } from '../../../core/services/applications.service
     RouterLink,
     MatCardModule,
     MatFormFieldModule,
+    MatSelectModule,
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
@@ -25,7 +29,14 @@ import { ApplicationsService } from '../../../core/services/applications.service
 export class ApplicationForm {
   private readonly fb = inject(FormBuilder);
   private readonly applicationsService = inject(ApplicationsService);
+  private readonly resumesService = inject(ResumesService);
   private readonly router = inject(Router);
+
+  // BehaviorSubject-backed, emits synchronously on subscribe, so this is
+  // already populated by the time the form below reads it for a default.
+  protected readonly resumeVersions = toSignal(this.resumesService.getResumeVersions(), {
+    initialValue: [],
+  });
 
   protected readonly form = this.fb.nonNullable.group({
     company: ['', Validators.required],
@@ -33,6 +44,7 @@ export class ApplicationForm {
     jobDescription: ['', Validators.required],
     appliedDate: [this.today(), Validators.required],
     notes: [''],
+    resumeVersionId: [this.defaultResumeVersionId()],
   });
 
   protected readonly submitting = signal(false);
@@ -43,15 +55,22 @@ export class ApplicationForm {
     }
 
     this.submitting.set(true);
+    const { resumeVersionId, ...rest } = this.form.getRawValue();
 
-    this.applicationsService.createApplication(this.form.getRawValue()).subscribe({
-      next: (created) => {
-        this.router.navigate(['/applications', created.applicationId]);
-      },
-      error: () => {
-        this.submitting.set(false);
-      },
-    });
+    this.applicationsService
+      .createApplication({ ...rest, resumeVersionId: resumeVersionId || undefined })
+      .subscribe({
+        next: (created) => {
+          this.router.navigate(['/applications', created.applicationId]);
+        },
+        error: () => {
+          this.submitting.set(false);
+        },
+      });
+  }
+
+  private defaultResumeVersionId(): string {
+    return this.resumeVersions().find((v) => v.isDefault)?.resumeVersionId ?? '';
   }
 
   private today(): string {

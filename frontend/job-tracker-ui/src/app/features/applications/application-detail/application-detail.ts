@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ApplicationsService } from '../../../core/services/applications.service';
+import { ResumesService } from '../../../core/services/resumes.service';
 import { ApplicationStatus } from '../../../core/models/application.model';
 
 const STATUS_OPTIONS: ApplicationStatus[] = [
@@ -37,6 +38,7 @@ const STATUS_OPTIONS: ApplicationStatus[] = [
 export class ApplicationDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly applicationsService = inject(ApplicationsService);
+  private readonly resumesService = inject(ResumesService);
   private readonly fb = inject(FormBuilder);
 
   protected readonly statusOptions = STATUS_OPTIONS;
@@ -47,10 +49,26 @@ export class ApplicationDetail {
     this.applicationsService.getApplication(this.applicationId),
   );
 
+  protected readonly resumeVersions = toSignal(this.resumesService.getResumeVersions(), {
+    initialValue: [],
+  });
+
+  // The resume version actually attached to the saved application (not the
+  // form's live selection) — used for the read-only "Resume" row + download
+  // link, same pattern as the other read-only fields in the metadata block.
+  protected readonly attachedResume = computed(() => {
+    const resumeVersionId = this.application()?.resumeVersionId;
+    if (!resumeVersionId) {
+      return undefined;
+    }
+    return this.resumeVersions().find((v) => v.resumeVersionId === resumeVersionId);
+  });
+
   protected readonly editForm = this.fb.nonNullable.group({
     status: ['applied' as ApplicationStatus, Validators.required],
     jobDescription: ['', Validators.required],
     notes: [''],
+    resumeVersionId: [''],
   });
 
   protected readonly submitting = signal(false);
@@ -59,14 +77,15 @@ export class ApplicationDetail {
   constructor() {
     // effect() re-runs whenever a signal it reads changes. Here it reacts
     // to `application` arriving (or changing elsewhere) and seeds the edit
-    // form with the current status/jobDescription.
+    // form with the current status/jobDescription/resumeVersionId.
     effect(() => {
       const app = this.application();
       if (app) {
         this.editForm.setValue({
           status: app.status,
           jobDescription: app.jobDescription,
-          notes: app.notes || ''
+          notes: app.notes ?? '',
+          resumeVersionId: app.resumeVersionId ?? '',
         });
       }
     });
@@ -79,15 +98,18 @@ export class ApplicationDetail {
 
     this.submitting.set(true);
     this.saved.set(false);
+    const { resumeVersionId, ...rest } = this.editForm.getRawValue();
 
-    this.applicationsService.updateApplication(this.applicationId, this.editForm.getRawValue()).subscribe({
-      next: () => {
-        this.submitting.set(false);
-        this.saved.set(true);
-      },
-      error: () => {
-        this.submitting.set(false);
-      },
-    });
+    this.applicationsService
+      .updateApplication(this.applicationId, { ...rest, resumeVersionId: resumeVersionId || undefined })
+      .subscribe({
+        next: () => {
+          this.submitting.set(false);
+          this.saved.set(true);
+        },
+        error: () => {
+          this.submitting.set(false);
+        },
+      });
   }
 }

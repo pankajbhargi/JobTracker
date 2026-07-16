@@ -1,13 +1,11 @@
 .layout-container {
-  height: 100vh;
-}
-
-mat-sidenav {
-  width: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .content {
+  flex: 1;
   padding: 24px;
-  min-height: calc(100vh - 128px);
   background-color: #f8fafc;
 }

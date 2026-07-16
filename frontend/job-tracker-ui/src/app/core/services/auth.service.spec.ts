@@ -7,6 +7,8 @@ import {
   signOut,
   getCurrentUser,
   fetchAuthSession,
+  fetchUserAttributes,
+  updateUserAttributes,
 } from 'aws-amplify/auth';
 import { AuthService } from './auth.service';
 
@@ -17,6 +19,8 @@ vi.mock('aws-amplify/auth', () => ({
   signOut: vi.fn(),
   getCurrentUser: vi.fn(),
   fetchAuthSession: vi.fn(),
+  fetchUserAttributes: vi.fn(),
+  updateUserAttributes: vi.fn(),
 }));
 
 describe('AuthService', () => {
@@ -60,9 +64,13 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('signs in and populates currentUser', async () => {
+    it('signs in and populates currentUser from fetchUserAttributes', async () => {
       (signIn as Mock).mockResolvedValue({ isSignedIn: true });
-      (getCurrentUser as Mock).mockResolvedValue({ username: 'jane@example.com' });
+      (getCurrentUser as Mock).mockResolvedValue({ username: 'random-cognito-id' });
+      (fetchUserAttributes as Mock).mockResolvedValue({
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+      });
 
       await service.login('jane@example.com', 'Password1');
 
@@ -71,8 +79,9 @@ describe('AuthService', () => {
         password: 'Password1',
       });
       expect(service.currentUser()).toEqual({
-        username: 'jane@example.com',
+        username: 'random-cognito-id',
         email: 'jane@example.com',
+        name: 'Jane Doe',
       });
     });
   });
@@ -80,13 +89,45 @@ describe('AuthService', () => {
   describe('logout', () => {
     it('signs out and clears currentUser', async () => {
       (signIn as Mock).mockResolvedValue({ isSignedIn: true });
-      (getCurrentUser as Mock).mockResolvedValue({ username: 'jane@example.com' });
+      (getCurrentUser as Mock).mockResolvedValue({ username: 'random-cognito-id' });
+      (fetchUserAttributes as Mock).mockResolvedValue({
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+      });
       await service.login('jane@example.com', 'Password1');
 
       (signOut as Mock).mockResolvedValue(undefined);
       await service.logout();
 
       expect(signOut).toHaveBeenCalled();
+      expect(service.currentUser()).toBeNull();
+    });
+  });
+
+  describe('updateName', () => {
+    it('calls updateUserAttributes and updates currentUser optimistically', async () => {
+      (signIn as Mock).mockResolvedValue({ isSignedIn: true });
+      (getCurrentUser as Mock).mockResolvedValue({ username: 'random-cognito-id' });
+      (fetchUserAttributes as Mock).mockResolvedValue({
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+      });
+      await service.login('jane@example.com', 'Password1');
+
+      (updateUserAttributes as Mock).mockResolvedValue({});
+      await service.updateName('Jane Smith');
+
+      expect(updateUserAttributes).toHaveBeenCalledWith({
+        userAttributes: { name: 'Jane Smith' },
+      });
+      expect(service.currentUser()?.name).toBe('Jane Smith');
+    });
+
+    it('does nothing to currentUser when signed out', async () => {
+      (updateUserAttributes as Mock).mockResolvedValue({});
+
+      await service.updateName('Jane Smith');
+
       expect(service.currentUser()).toBeNull();
     });
   });

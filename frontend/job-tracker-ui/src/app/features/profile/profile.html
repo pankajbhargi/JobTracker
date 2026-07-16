@@ -1,1 +1,113 @@
-<p>profile works!</p>
+<div class="profile">
+  <h1 class="profile__title">Profile</h1>
+
+  <mat-card class="profile__section">
+    <mat-card-header>
+      <mat-card-title>Account</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="profile__field">
+        <span class="profile__field-label">Email</span>
+        <span>{{ currentUser()?.email }}</span>
+      </div>
+
+      <div class="profile__field">
+        <span class="profile__field-label">Name</span>
+
+        @if (editingName()) {
+          <form [formGroup]="nameForm" (ngSubmit)="onSaveName()" class="profile__name-form">
+            <mat-form-field appearance="outline" class="profile__name-field">
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="submit" [disabled]="nameForm.invalid || savingName()">
+              Save
+            </button>
+            <button mat-button type="button" (click)="editingName.set(false)">Cancel</button>
+          </form>
+        } @else {
+          <span>{{ currentUser()?.name || '—' }}</span>
+          <button mat-icon-button aria-label="Edit name" (click)="startEditingName()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="profile__section">
+    <mat-card-header>
+      <mat-card-title>Resume Library</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @for (version of resumeVersions(); track version.resumeVersionId) {
+        <div class="resume-version">
+          <div class="resume-version__info">
+            <div class="resume-version__title">
+              {{ version.label || version.fileName }}
+              @if (version.isDefault) {
+                <mat-chip class="resume-version__badge resume-version__badge--default">Default</mat-chip>
+              }
+              <mat-chip class="resume-version__badge resume-version__badge--{{ version.source }}">
+                {{ version.source === 'ai_generated' ? 'AI-informed' : 'Manual' }}
+              </mat-chip>
+            </div>
+            <div class="resume-version__meta">{{ version.fileName }} · uploaded {{ version.uploadedAt.slice(0, 10) }}</div>
+            @if (version.changeNotes) {
+              <div class="resume-version__notes">{{ version.changeNotes }}</div>
+            }
+          </div>
+
+          <div class="resume-version__actions">
+            @if (version.resumeKey) {
+              <a mat-button [href]="version.resumeKey" [download]="version.fileName">Download</a>
+            }
+            @if (!version.isDefault) {
+              <button mat-button (click)="setDefault(version.resumeVersionId)">Set as Default</button>
+            }
+            <button mat-button color="warn" (click)="deleteVersion(version.resumeVersionId)">Delete</button>
+          </div>
+        </div>
+      }
+
+      @if (!showUploadForm()) {
+        <button mat-flat-button color="primary" (click)="showUploadForm.set(true)">
+          <mat-icon>upload</mat-icon>
+          Upload New Version
+        </button>
+      } @else {
+        <form [formGroup]="uploadForm" (ngSubmit)="onUpload()" class="upload-form">
+          <input type="file" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" />
+
+          <mat-form-field appearance="outline">
+            <mat-label>Label (optional)</mat-label>
+            <input matInput formControlName="label" placeholder="e.g. Backend-focused" />
+          </mat-form-field>
+
+          <mat-radio-group formControlName="source" class="upload-form__source">
+            <mat-radio-button value="manual">Manual</mat-radio-button>
+            <mat-radio-button value="ai_generated">AI-informed</mat-radio-button>
+          </mat-radio-group>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Change Notes (optional)</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              formControlName="changeNotes"
+              placeholder="Why was this version created? Paste AI suggestions or your own notes."
+            ></textarea>
+          </mat-form-field>
+
+          <div class="upload-form__actions">
+            <button mat-button type="button" (click)="showUploadForm.set(false)">Cancel</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="uploading()">
+              Upload
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,109 @@
+.profile__title {
+  margin: 0 0 1.5rem;
+}
+
+.profile__section {
+  max-width: 700px;
+  margin-bottom: 1.5rem;
+}
+
+.profile__field {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.profile__field-label {
+  font-weight: 600;
+  opacity: 0.7;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.profile__name-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile__name-field {
+  width: 220px;
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    min-height: unset;
+  }
+}
+
+.resume-version {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.resume-version__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.resume-version__meta {
+  font-size: 0.8125rem;
+  opacity: 0.65;
+  margin-top: 0.25rem;
+}
+
+.resume-version__notes {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+}
+
+.resume-version__badge {
+  font-size: 0.75rem;
+  min-height: 22px;
+}
+
+.resume-version__badge--default {
+  background: #e8f5e9;
+}
+
+.resume-version__badge--manual {
+  background: #e3f2fd;
+}
+
+.resume-version__badge--ai_generated {
+  background: #f3e5f5;
+}
+
+.resume-version__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.upload-form__source {
+  display: flex;
+  gap: 1rem;
+}
+
+.upload-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

@@ -38,6 +38,24 @@
           }
         </mat-form-field>
 
+        @if (resumeVersions().length > 0) {
+          <mat-form-field appearance="outline">
+            <mat-label>Resume</mat-label>
+            <mat-select formControlName="resumeVersionId">
+              <mat-option value="">None</mat-option>
+              @for (version of resumeVersions(); track version.resumeVersionId) {
+                <mat-option [value]="version.resumeVersionId">
+                  {{ version.label || version.fileName }}{{ version.isDefault ? ' (Default)' : '' }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <p class="application-form__hint">
+            No resumes uploaded yet — add one from your <a routerLink="/profile">Profile</a> page.
+          </p>
+        }
+
         <mat-form-field appearance="outline">
           <mat-label>Notes (optional)</mat-label>
           <textarea matInput rows="3" formControlName="notes"></textarea>

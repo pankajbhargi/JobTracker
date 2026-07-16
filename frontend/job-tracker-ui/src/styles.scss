@@ -1,3 +1,17 @@
+@use '@angular/material' as mat;
+
+// Material components (menus, selects, dialogs, tooltips) render into a
+// global CDK overlay outside any component's own template, so they need a
+// theme defined here at the root — without this, those overlay panels have
+// no defined background and render transparent.
+html {
+  @include mat.theme((
+    color: mat.$azure-palette,
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
 /* Global Reset */
 html,
 body {

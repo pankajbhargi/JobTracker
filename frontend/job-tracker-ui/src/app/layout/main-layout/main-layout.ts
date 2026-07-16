@@ -1,10 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { MatSidenavModule } from '@angular/material/sidenav';
-
 import { Header } from '../header/header';
-import { Sidenav } from '../sidenav/sidenav';
 import { Footer } from '../footer/footer';
 
 @Component({
@@ -12,9 +9,7 @@ import { Footer } from '../footer/footer';
   standalone: true,
   imports: [
     RouterOutlet,
-    MatSidenavModule,
     Header,
-    Sidenav,
     Footer
   ],
   templateUrl: './main-layout.html',

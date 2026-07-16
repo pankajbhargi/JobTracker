@@ -14,6 +14,6 @@ export interface Application {
   status: ApplicationStatus;
   appliedDate: string;
   followUpDate?: string;
-  resumeKey?: string;
+  resumeVersionId?: string;
   notes?: string;
 }

@@ -6,13 +6,16 @@ import {
   signOut,
   getCurrentUser,
   fetchAuthSession,
-} from 'aws-amplify/auth'; 
+  fetchUserAttributes,
+  updateUserAttributes,
+} from 'aws-amplify/auth';
 // https://aws-amplify.github.io/amplify-js/api/
 // https://docs.amplify.aws/angular/frontend/auth/manage-user-sessions/
 
 export interface AuthUser {
   username: string;
   email: string;
+  name: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -88,8 +91,6 @@ export class AuthService {
     if (!session || !session.tokens) {
       return false;
     }
-    // console.log("id token", session.tokens.idToken);
-    // console.log("access token", session.tokens.accessToken);
     return true
   }
 
@@ -98,8 +99,7 @@ export class AuthService {
    * Authorization header on API calls.
    */
   async getIdToken(): Promise<string | null> {
-    // return session.tokens?.idToken?.toString() from fetchAuthSession(),
-    // or null if signed out.
+    // return session.tokens?.idToken?.toString() from fetchAuthSession(), or null if signed out.
     const session = await fetchAuthSession();
     if (!session || !session.tokens || !session.tokens.idToken) {
       return null;
@@ -107,14 +107,30 @@ export class AuthService {
     return session.tokens.idToken.toString();
   }
 
-  private async loadCurrentUser(): Promise<void> {
-    // call getCurrentUser() to get { username }, then
-    const { username, userId, signInDetails } = await getCurrentUser();
-    this.currentUser.set({ username, email: username });
+  /**
+   * Updates the standard `name` attribute on the Cognito user, then
+   * reflects the change in `currentUser` immediately (optimistic update —
+   * updateUserAttributes() doesn't return the new attribute values itself).
+   */
+  async updateName(name: string): Promise<void> {
+    await updateUserAttributes({ userAttributes: { name } });
+    const current = this.currentUser();
+    if (current) {
+      this.currentUser.set({ ...current, name });
+    }
+  }
 
-    console.log("username", username);
-    console.log("user id", userId);
-    // TODO - remove this logging
-    console.log("sign-in details", signInDetails);
+  private async loadCurrentUser(): Promise<void> {
+    // getCurrentUser() only gives us { username }, which is a random
+    // Cognito-generated id here (not the email — see the sign_in_aliases
+    // discussion). The real email and name attributes come from
+    // fetchUserAttributes() instead.
+    const { username } = await getCurrentUser();
+    const attributes = await fetchUserAttributes();
+    this.currentUser.set({
+      username,
+      email: attributes.email ?? '',
+      name: attributes.name ?? '',
+    });
   }
 }

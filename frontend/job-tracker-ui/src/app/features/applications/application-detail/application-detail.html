@@ -14,6 +14,15 @@
             <dt>Follow-up</dt>
             <dd>{{ app.followUpDate }}</dd>
           }
+          @if (attachedResume(); as resume) {
+            <dt>Resume</dt>
+            <dd>
+              {{ resume.label || resume.fileName }}
+              @if (resume.resumeKey) {
+                <a [href]="resume.resumeKey" [download]="resume.fileName">(Download)</a>
+              }
+            </dd>
+          }
         </dl>
 
         <form [formGroup]="editForm" (ngSubmit)="onSave()" class="application-detail__form">
@@ -29,6 +38,18 @@
           <mat-form-field appearance="outline">
             <mat-label>Job Description</mat-label>
             <textarea matInput rows="8" formControlName="jobDescription"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Resume</mat-label>
+            <mat-select formControlName="resumeVersionId">
+              <mat-option value="">None</mat-option>
+              @for (version of resumeVersions(); track version.resumeVersionId) {
+                <mat-option [value]="version.resumeVersionId">
+                  {{ version.label || version.fileName }}{{ version.isDefault ? ' (Default)' : '' }}
+                </mat-option>
+              }
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">

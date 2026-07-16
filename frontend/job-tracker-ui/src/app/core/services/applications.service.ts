@@ -8,12 +8,14 @@ export interface CreateApplicationInput {
   jobDescription: string;
   appliedDate: string;
   notes?: string;
+  resumeVersionId?: string;
 }
 
 export interface UpdateApplicationInput {
   status: ApplicationStatus;
   jobDescription: string;
   notes: string;
+  resumeVersionId?: string;
 }
 
 // Static sample data standing in for the real API (Phase 3).
