@@ -31,12 +31,15 @@ class DatabaseConstruct(Construct):
             allow_all_outbound=True
         )
 
-        db_username = self.node.try_get_context("dbUsername")
-        db_password = self.node.try_get_context("dbPassword")
+        # Exposed (not just local vars) so ApplicationsApiConstruct can wire
+        # them into the Lambda's environment variables.
+        self.db_username = self.node.try_get_context("dbUsername")
+        self.db_password = self.node.try_get_context("dbPassword")
+        self.database_name = "jobtracker"
 
         credentials = rds.Credentials.from_password(
-            username = db_username,
-            password = SecretValue.unsafe_plain_text(db_password)
+            username = self.db_username,
+            password = SecretValue.unsafe_plain_text(self.db_password)
         )
 
         self.database = rds.DatabaseInstance(
@@ -94,4 +97,14 @@ class DatabaseConstruct(Construct):
             self,
             "DatabasePort",
             value = self.database.db_instance_endpoint_port
+        )
+
+    def allow_lambda_access(self, lambda_security_group: ec2.SecurityGroup) -> None:
+        """Opens port 3306 to whichever Lambda security group needs to reach
+        this database. The security group starts with zero ingress rules —
+        nothing can connect until this is called."""
+        self.database_security_group.add_ingress_rule(
+            peer = lambda_security_group,
+            connection = ec2.Port.tcp(3306),
+            description = "Allow Lambda access to MySQL"
         )
