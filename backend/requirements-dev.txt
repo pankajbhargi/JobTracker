@@ -4,3 +4,4 @@ pluggy==1.6.0
 iniconfig==2.3.0
 colorama==0.4.6
 Pygments==2.20.0
+requests==2.32.3
