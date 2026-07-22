@@ -90,7 +90,23 @@ class ApplicationsApiConstruct(Construct):
 
             timeout = Duration.seconds(10),
 
-            memory_size = 256
+            memory_size = 256,
+
+            # Without this, PythonFunction rsyncs the ENTIRE "../../backend"
+            # entry directory into the deployment package — including the
+            # local .venv (~500MB) and the test suite. That blew the asset
+            # past Lambda's 250MB unzipped limit; excluding them here is what
+            # keeps the package small enough to actually deploy.
+            bundling = lambda_python.BundlingOptions(
+                asset_excludes = [
+                    ".venv",
+                    "tests",
+                    ".pytest_cache",
+                    "__pycache__",
+                    "pytest.ini",
+                    "requirements-dev.txt"
+                ]
+            )
         )
 
         authorizer = apigateway.CognitoUserPoolsAuthorizer(

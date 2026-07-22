@@ -18,6 +18,20 @@ def list_applications(user_id: str) -> list[ApplicationResponse]:
     return [ApplicationResponse(**row) for row in rows]
 
 
+def get_application(user_id: str, application_id: str) -> Optional[ApplicationResponse]:
+    # fetch a single application scoped to BOTH application_id and user_id 
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM applications WHERE application_id = %s AND user_id = %s",
+            (application_id, user_id),
+        )
+        row = cursor.fetchone()
+    if not row:
+        return None
+    return ApplicationResponse(**row)
+
+
 def create_application(user_id: str, data: ApplicationCreate) -> ApplicationResponse:
     application_id = str(uuid.uuid4())
     status = "applied"  # every new application starts here — same rule the
@@ -25,8 +39,7 @@ def create_application(user_id: str, data: ApplicationCreate) -> ApplicationResp
 
     connection = get_connection()
     with connection.cursor() as cursor:
-        # %s placeholders — PyMySQL parameterizes these safely. Never
-        # f-string/format user-supplied values directly into SQL.
+        # %s placeholders — PyMySQL parameterizes these safely.
         cursor.execute(
             """
             INSERT INTO applications
@@ -52,43 +65,51 @@ def create_application(user_id: str, data: ApplicationCreate) -> ApplicationResp
     # round-trip — we generated application_id/status ourselves and already
     # have every other field on `data`.
     return ApplicationResponse(
-        application_id=application_id,
-        user_id=user_id,
-        status=status,
+        application_id = application_id,
+        user_id = user_id,
+        status = status,
         **data.model_dump(),
     )
 
 
-def get_application(user_id: str, application_id: str) -> Optional[ApplicationResponse]:
-    # TODO: fetch a single application scoped to BOTH application_id and
-    # user_id (never trust application_id alone — another user could guess
-    # an id otherwise). Hint: same connection/cursor pattern as
-    # list_applications above, but:
-    #   cursor.execute(
-    #       "SELECT * FROM applications WHERE application_id = %s AND user_id = %s",
-    #       (application_id, user_id),
-    #   )
-    #   row = cursor.fetchone()
-    # Return None if no row was found (the handler turns that into a 404) —
-    # otherwise ApplicationResponse(**row), same as list_applications.
-    raise NotImplementedError
-
-
-def update_application(
-    user_id: str, application_id: str, data: ApplicationUpdate
-) -> Optional[ApplicationResponse]:
-    # TODO: UPDATE status/job_description/notes/resume_version_id for the
-    # row matching application_id AND user_id — same %s-placeholder
-    # parameterization as create_application above. After the UPDATE,
-    # call get_application(user_id, application_id) (once you've implemented
-    # it) to return the fresh row — it'll also naturally return None if
+def update_application(user_id: str, application_id: str, 
+                       data: ApplicationUpdate) -> Optional[ApplicationResponse]:
+    # UPDATE status/job_description/notes/resume_version_id for the
+    # row matching application_id AND user_id. After the UPDATE,
+    # call get_application(user_id, application_id) to return the fresh row — return None if
     # nothing matched, which the handler turns into a 404.
-    raise NotImplementedError
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        # %s placeholders — PyMySQL parameterizes these safely.
+        cursor.execute(
+            """
+            UPDATE applications
+            SET status = %s, job_description = %s, notes = %s, resume_version_id = %s
+            WHERE application_id = %s AND user_id = %s
+            """,
+            (
+                data.status,
+                data.job_description,
+                data.notes,
+                data.resume_version_id,
+                application_id,
+                user_id,
+            ),
+        )
+
+    rowcount = cursor.rowcount
+    if rowcount == 0:
+        return None
+    else:
+        return get_application(user_id, application_id)
 
 
 def delete_application(user_id: str, application_id: str) -> bool:
-    # TODO: DELETE the row matching application_id AND user_id. Return True
-    # if a row was actually deleted, False if nothing matched. Hint: after
-    # cursor.execute(...), the cursor's `.rowcount` attribute tells you how
-    # many rows were affected.
-    raise NotImplementedError
+    # DELETE the row matching application_id AND user_id. Return True if a row was actually deleted, False if nothing matched.
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM applications WHERE application_id = %s AND user_id = %s",
+            (application_id, user_id),
+        )
+    return cursor.rowcount > 0

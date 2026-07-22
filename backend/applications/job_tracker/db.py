@@ -39,6 +39,7 @@ def get_connection() -> Connection:
             database=os.environ["DB_NAME"],
             autocommit=True,
             cursorclass=pymysql.cursors.DictCursor,
+            client_flag=pymysql.constants.CLIENT.FOUND_ROWS
         )
         with _connection.cursor() as cursor:
             cursor.execute(CREATE_APPLICATIONS_TABLE)

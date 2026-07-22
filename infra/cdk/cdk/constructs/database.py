@@ -50,7 +50,7 @@ class DatabaseConstruct(Construct):
 
             engine = rds.DatabaseInstanceEngine.mysql(
                 version = rds.MysqlEngineVersion.of(
-                    mysql_full_version="8.4.3", 
+                    mysql_full_version="8.4.10",
                     mysql_major_version="8.4"
                 )
             ),
